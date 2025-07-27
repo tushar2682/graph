@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dijkstra's Algorithm Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #4ecdc4, #44a085);
+            color: white;
+        }
+
+        .btn-tertiary {
+            background: linear-gradient(45deg, #ffa726, #ff9800);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .canvas-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        #graphCanvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+            cursor: crosshair;
+        }
+
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .info-card h3 {
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+
+        .distance-table {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .distance-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .mode-selector {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .mode-selector label {
+            margin: 0 10px;
+            font-size: 16px;
+        }
+
+        .mode-selector input[type="radio"] {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗺️ Dijkstra's Algorithm Visualizer</h1>
+            <p>Find the shortest path between nodes in a weighted graph</p>
+        </div>
+
+        <div class="mode-selector">
+            <label><input type="radio" name="mode" value="addNode" checked> Add Nodes</label>
+            <label><input type="radio" name="mode" value="addEdge"> Add Edges</label>
+            <label><input type="radio" name="mode" value="setStart"> Set Start</label>
+            <label><input type="radio" name="mode" value="setEnd"> Set End</label>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="runDijkstra()">🚀 Run Dijkstra</button>
+            <button class="btn btn-secondary" onclick="clearGraph()">🧹 Clear Graph</button>
+            <button class="btn btn-tertiary" onclick="generateRandomGraph()">🎲 Random Graph</button>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="graphCanvas" width="800" height="500"></canvas>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>📊 Algorithm Status</h3>
+                    <div id="status">Ready to start</div>
+                    <div id="currentStep"></div>
+                </div>
+                <div class="info-card">
+                    <h3>📏 Distances</h3>
+                    <div class="distance-table" id="distanceTable"></div>
+                </div>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4CAF50;"></div>
+                    <span>Start Node</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f44336;"></div>
+                    <span>End Node</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #2196F3;"></div>
+                    <span>Unvisited</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FFC107;"></div>
+                    <span>Visiting</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #9C27B0;"></div>
+                    <span>Visited</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FF5722;"></div>
+                    <span>Shortest Path</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class DijkstraVisualizer {
+            constructor() {
+                this.canvas = document.getElementById('graphCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.nodes = [];
+                this.edges = [];
+                this.startNode = null;
+                this.endNode = null;
+                this.mode = 'addNode';
+                this.isRunning = false;
+                
+                this.nodeRadius = 25;
+                this.colors = {
+                    default: '#2196F3',
+                    start: '#4CAF50',
+                    end: '#f44336',
+                    visiting: '#FFC107',
+                    visited: '#9C27B0',
+                    path: '#FF5722'
+                };
+
+                this.setupEventListeners();
+                this.generateRandomGraph();
+            }
+
+            setupEventListeners() {
+                this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
+                
+                document.querySelectorAll('input[name="mode"]').forEach(radio => {
+                    radio.addEventListener('change', (e) => {
+                        this.mode = e.target.value;
+                    });
+                });
+            }
+
+            handleCanvasClick(e) {
+                if (this.isRunning) return;
+
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                switch (this.mode) {
+                    case 'addNode':
+                        this.addNode(x, y);
+                        break;
+                    case 'addEdge':
+                        this.handleEdgeClick(x, y);
+                        break;
+                    case 'setStart':
+                        this.setStartNode(x, y);
+                        break;
+                    case 'setEnd':
+                        this.setEndNode(x, y);
+                        break;
+                }
+            }
+
+            addNode(x, y) {
+                // Check if clicking too close to existing node
+                const existingNode = this.getNodeAt(x, y);
+                if (existingNode) return;
+
+                const node = {
+                    id: this.nodes.length,
+                    x: x,
+                    y: y,
+                    distance: Infinity,
+                    previous: null,
+                    visited: false,
+                    color: this.colors.default
+                };
+                
+                this.nodes.push(node);
+                this.draw();
+            }
+
+            getNodeAt(x, y) {
+                return this.nodes.find(node => {
+                    const dx = node.x - x;
+                    const dy = node.y - y;
+                    return Math.sqrt(dx * dx + dy * dy) <= this.nodeRadius;
+                });
+            }
+
+            handleEdgeClick(x, y) {
+                const node = this.getNodeAt(x, y);
+                if (!node) return;
+
+                if (!this.selectedNode) {
+                    this.selectedNode = node;
+                    node.color = this.colors.visiting;
+                } else if (this.selectedNode !== node) {
+                    const weight = Math.floor(Math.random() * 20) + 1; // Random weight 1-20
+                    this.addEdge(this.selectedNode, node, weight);
+                    this.selectedNode.color = this.colors.default;
+                    this.selectedNode = null;
+                } else {
+                    this.selectedNode.color = this.colors.default;
+                    this.selectedNode = null;
+                }
+                this.draw();
+            }
+
+            addEdge(node1, node2, weight) {
+                // Check if edge already exists
+                const existingEdge = this.edges.find(edge => 
+                    (edge.from === node1 && edge.to === node2) ||
+                    (edge.from === node2 && edge.to === node1)
+                );
+                
+                if (!existingEdge) {
+                    this.edges.push({
+                        from: node1,
+                        to: node2,
+                        weight: weight
+                    });
+                }
+            }
+
+            setStartNode(x, y) {
+                const node = this.getNodeAt(x, y);
+                if (!node) return;
+
+                if (this.startNode) {
+                    this.startNode.color = this.colors.default;
+                }
+                this.startNode = node;
+                node.color = this.colors.start;
+                this.draw();
+            }
+
+            setEndNode(x, y) {
+                const node = this.getNodeAt(x, y);
+                if (!node || node === this.startNode) return;
+
+                if (this.endNode) {
+                    this.endNode.color = this.colors.default;
+                }
+                this.endNode = node;
+                node.color = this.colors.end;
+                this.draw();
+            }
+
+            async runDijkstra() {
+                if (!this.startNode || this.isRunning) {
+                    document.getElementById('status').textContent = "Please set a start node first!";
+                    return;
+                }
+
+                this.isRunning = true;
+                document.getElementById('status').textContent = "Running Dijkstra's Algorithm...";
+
+                // Reset all nodes
+                this.nodes.forEach(node => {
+                    node.distance = Infinity;
+                    node.previous = null;
+                    node.visited = false;
+                    if (node !== this.startNode && node !== this.endNode) {
+                        node.color = this.colors.default;
+                    }
+                });
+
+                this.startNode.distance = 0;
+                const unvisited = [...this.nodes];
+
+                while (unvisited.length > 0) {
+                    // Find node with minimum distance
+                    let current = unvisited.reduce((min, node) => 
+                        node.distance < min.distance ? node : min
+                    );
+
+                    if (current.distance === Infinity) break; // No more reachable nodes
+
+                    // Remove current from unvisited
+                    const index = unvisited.indexOf(current);
+                    unvisited.splice(index, 1);
+
+                    // Mark as visiting
+                    if (current !== this.startNode && current !== this.endNode) {
+                        current.color = this.colors.visiting;
+                    }
+
+                    document.getElementById('currentStep').textContent = `Visiting node ${current.id}`;
+                    this.updateDistanceTable();
+                    this.draw();
+                    await this.delay(800);
+
+                    // Check neighbors
+                    const neighbors = this.getNeighbors(current);
+                    for (let neighbor of neighbors) {
+                        if (neighbor.visited) continue;
+
+                        const edge = this.edges.find(e => 
+                            (e.from === current && e.to === neighbor) ||
+                            (e.from === neighbor && e.to === current)
+                        );
+
+                        const tentativeDistance = current.distance + edge.weight;
+                        
+                        if (tentativeDistance < neighbor.distance) {
+                            neighbor.distance = tentativeDistance;
+                            neighbor.previous = current;
+                        }
+                    }
+
+                    // Mark as visited
+                    current.visited = true;
+                    if (current !== this.startNode && current !== this.endNode) {
+                        current.color = this.colors.visited;
+                    }
+
+                    this.draw();
+                    await this.delay(400);
+
+                    if (current === this.endNode) break;
+                }
+
+                // Highlight shortest path
+                if (this.endNode && this.endNode.distance !== Infinity) {
+                    await this.highlightPath();
+                    document.getElementById('status').textContent = `Shortest path found! Distance: ${this.endNode.distance}`;
+                } else {
+                    document.getElementById('status').textContent = "No path found to target node";
+                }
+
+                this.isRunning = false;
+            }
+
+            getNeighbors(node) {
+                return this.edges
+                    .filter(edge => edge.from === node || edge.to === node)
+                    .map(edge => edge.from === node ? edge.to : edge.from);
+            }
+
+            async highlightPath() {
+                if (!this.endNode || this.endNode.distance === Infinity) return;
+
+                const path = [];
+                let current = this.endNode;
+                
+                while (current) {
+                    path.unshift(current);
+                    current = current.previous;
+                }
+
+                // Animate path highlighting
+                for (let i = 0; i < path.length - 1; i++) {
+                    const edge = this.edges.find(e => 
+                        (e.from === path[i] && e.to === path[i + 1]) ||
+                        (e.from === path[i + 1] && e.to === path[i])
+                    );
+                    if (edge) {
+                        edge.isPath = true;
+                        this.draw();
+                        await this.delay(300);
+                    }
+                }
+            }
+
+            updateDistanceTable() {
+                const table = document.getElementById('distanceTable');
+                table.innerHTML = '';
+                
+                this.nodes.forEach(node => {
+                    const row = document.createElement('div');
+                    row.className = 'distance-row';
+                    
+                    const nodeLabel = document.createElement('span');
+                    nodeLabel.textContent = `Node ${node.id}`;
+                    
+                    const distance = document.createElement('span');
+                    distance.textContent = node.distance === Infinity ? '∞' : node.distance;
+                    
+                    row.appendChild(nodeLabel);
+                    row.appendChild(distance);
+                    table.appendChild(row);
+                });
+            }
+
+            generateRandomGraph() {
+                this.clearGraph();
+                const numNodes = 8;
+                
+                // Generate nodes in a nice layout
+                for (let i = 0; i < numNodes; i++) {
+                    const angle = (i / numNodes) * 2 * Math.PI;
+                    const radius = 150;
+                    const x = this.canvas.width / 2 + radius * Math.cos(angle);
+                    const y = this.canvas.height / 2 + radius * Math.sin(angle);
+                    
+                    this.addNode(x, y);
+                }
+
+                // Generate random edges
+                for (let i = 0; i < numNodes; i++) {
+                    const connections = Math.floor(Math.random() * 3) + 2; // 2-4 connections per node
+                    for (let j = 0; j < connections; j++) {
+                        const target = Math.floor(Math.random() * numNodes);
+                        if (target !== i && Math.random() > 0.3) {
+                            const weight = Math.floor(Math.random() * 15) + 1;
+                            this.addEdge(this.nodes[i], this.nodes[target], weight);
+                        }
+                    }
+                }
+
+                // Set start and end nodes
+                this.setStartNode(this.nodes[0].x, this.nodes[0].y);
+                this.setEndNode(this.nodes[Math.floor(numNodes/2)].x, this.nodes[Math.floor(numNodes/2)].y);
+            }
+
+            clearGraph() {
+                this.nodes = [];
+                this.edges = [];
+                this.startNode = null;
+                this.endNode = null;
+                this.selectedNode = null;
+                this.isRunning = false;
+                document.getElementById('status').textContent = "Ready to start";
+                document.getElementById('currentStep').textContent = "";
+                document.getElementById('distanceTable').innerHTML = "";
+                this.draw();
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Draw edges
+                this.edges.forEach(edge => {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(edge.from.x, edge.from.y);
+                    this.ctx.lineTo(edge.to.x, edge.to.y);
+                    this.ctx.strokeStyle = edge.isPath ? this.colors.path : '#666';
+                    this.ctx.lineWidth = edge.isPath ? 4 : 2;
+                    this.ctx.stroke();
+
+                    // Draw weight
+                    const midX = (edge.from.x + edge.to.x) / 2;
+                    const midY = (edge.from.y + edge.to.y) / 2;
+                    
+                    this.ctx.fillStyle = edge.isPath ? this.colors.path : '#333';
+                    this.ctx.font = 'bold 14px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(edge.weight, midX, midY - 5);
+                });
+
+                // Draw nodes
+                this.nodes.forEach(node => {
+                    this.ctx.beginPath();
+                    this.ctx.arc(node.x, node.y, this.nodeRadius, 0, 2 * Math.PI);
+                    this.ctx.fillStyle = node.color;
+                    this.ctx.fill();
+                    this.ctx.strokeStyle = '#333';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.stroke();
+
+                    // Draw node label
+                    this.ctx.fillStyle = '#fff';
+                    this.ctx.font = 'bold 16px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(node.id, node.x, node.y + 5);
+
+                    // Draw distance
+                    if (node.distance !== Infinity) {
+                        this.ctx.fillStyle = '#333';
+                        this.ctx.font = '12px Arial';
+                        this.ctx.fillText(node.distance, node.x, node.y - 35);
+                    }
+                });
+            }
+
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        // Global functions
+        let visualizer;
+
+        window.onload = function() {
+            visualizer = new DijkstraVisualizer();
+        };
+
+        function runDijkstra() {
+            visualizer.runDijkstra();
+        }
+
+        function clearGraph() {
+            visualizer.clearGraph();
+        }
+
+        function generateRandomGraph() {
+            visualizer.generateRandomGraph();
+        }
+    </script>
+</body>
+</html>
