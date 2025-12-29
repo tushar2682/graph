@@ -1,70 +1,155 @@
-# Getting Started with Create React App
+# Dijkstra’s Algorithm – Shortest Path Finder
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A comprehensive implementation of **Dijkstra’s Algorithm** for finding the **shortest paths from a source node to all other nodes** in a weighted graph.  
+This project focuses on **algorithmic correctness, performance, scalability, and real-world use cases**, making it suitable for **academic study, competitive programming, and production systems**.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 📌 Table of Contents
 
-### `npm start`
+1. Introduction  
+2. Problem Statement  
+3. Algorithm Overview  
+4. Why Dijkstra’s Algorithm  
+5. Applications  
+6. Graph Representation  
+7. Data Structures Used  
+8. Time & Space Complexity  
+9. Project Features  
+10. Input & Output Format  
+11. Implementation Details  
+12. Example Walkthrough  
+13. Edge Cases Handled  
+14. Limitations  
+15. Optimization Techniques  
+16. Comparison with Other Algorithms  
+17. Real-World Use Cases  
+18. Project Structure  
+19. How to Run  
+20. Testing Strategy  
+21. Future Enhancements  
+22. Academic Relevance  
+23. Interview Relevance  
+24. License  
+25. Author  
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🧠 Introduction
 
-### `npm test`
+Dijkstra’s Algorithm is one of the most fundamental and widely used **graph algorithms** in computer science.  
+It computes the **shortest path** from a given **source vertex** to all other vertices in a graph with **non-negative edge weights**.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+This project demonstrates:
+- Correct implementation of Dijkstra’s Algorithm
+- Efficient use of data structures
+- Clean, modular, and readable code
+- Practical considerations for real-world systems
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## ❓ Problem Statement
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Given:
+- A weighted graph `G(V, E)`
+- A source vertex `S`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Find:
+- The **shortest distance** from `S` to every other vertex in the graph
+- Optionally, the **actual shortest path**
 
-### `npm run eject`
+Constraints:
+- Edge weights must be **non-negative**
+- Graph may be directed or undirected
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## ⚙️ Algorithm Overview
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Dijkstra’s Algorithm works by:
+1. Initializing distances from the source to all vertices as infinity
+2. Setting the source distance to 0
+3. Using a **priority queue (min-heap)** to always expand the closest unvisited node
+4. Relaxing edges and updating distances
+5. Repeating until all nodes are visited or the queue is empty
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## 💡 Why Dijkstra’s Algorithm?
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+✔ Guarantees optimal shortest paths  
+✔ Efficient for sparse graphs  
+✔ Widely used in real-world systems  
+✔ Simple yet powerful  
+✔ Foundation for advanced routing algorithms  
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## 🌍 Applications
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- GPS Navigation Systems
+- Google Maps routing
+- Network routing protocols
+- Traffic management systems
+- Game AI pathfinding
+- Robotics navigation
+- Logistics and supply chain optimization
+- Social network analysis
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 🗺️ Graph Representation
 
-### Making a Progressive Web App
+The graph is represented using:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- **Adjacency List**
+- Each node maintains a list of `(neighbor, weight)` pairs
 
-### Advanced Configuration
+Advantages:
+- Space efficient
+- Faster iteration over neighbors
+- Suitable for sparse graphs
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+## 🧱 Data Structures Used
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+| Data Structure | Purpose |
+|---------------|--------|
+| Priority Queue (Min Heap) | Select next closest node |
+| HashMap / Array | Store distances |
+| Visited Set | Prevent reprocessing |
+| Parent Map | Path reconstruction |
 
-### `npm run build` fails to minify
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## ⏱️ Time Complexity
+
+| Implementation | Time Complexity |
+|---------------|----------------|
+| Array-based | O(V²) |
+| Priority Queue | O((V + E) log V) |
+
+---
+
+## 💾 Space Complexity
+
+- O(V + E)
+- Stores graph, distance array, and priority queue
+
+---
+
+## ✨ Project Features
+
+- Supports directed & undirected graphs
+- Supports weighted graphs
+- Efficient priority queue implementation
+- Path reconstruction
+- Handles disconnected graphs
+- Clean modular code
+- Easy to extend
+
+---
+
+## 📥 Input Format
+
